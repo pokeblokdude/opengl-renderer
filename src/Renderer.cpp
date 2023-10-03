@@ -10,10 +10,13 @@
 #include "world/Scene.h"
 #include "world/Mesh.h"
 #include "world/Camera.h"
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
 
 Renderer::Renderer() {
 
-	window = new Window(800, 600, "OpenGL Renderer");
+	window = new Window(1920, 1080, "OpenGL Renderer");
 
 	shader = std::make_unique<Shader>("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
 
@@ -22,9 +25,9 @@ Renderer::Renderer() {
 	camera->transform.position.z = 10;
 
 	glfwSetWindowUserPointer(window->GetRenderContext(), window);
-	auto func = [](GLFWwindow*, int width, int height) {
-		
-
+	auto func = [](GLFWwindow* window, int width, int height) {
+		static_cast<Window*>(glfwGetWindowUserPointer(window))->Resize(width, height);
+		glViewport(0, 0, width, height);
 	};
 
 	glfwSetFramebufferSizeCallback(window->GetRenderContext(), func);
@@ -95,6 +98,19 @@ void Renderer::Tick(float deltaTime) {
 	scene->objects[0]->transform.rotation.x += 10 * deltaTime;
 
 	// actual rendering
+	camera->Resize(window->width / (float)window->height);
+
+	// setup ImGui frame
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+	
+	ImGui::Begin("Debug Window");
+	ImGui::Text("%.2f fps / %f ms", 1 / deltaTime, deltaTime);
+	ImGui::Text("Frame Size: %ix%i (%.3f:1)", window->width, window->height, camera->aspect);
+	ImGui::End();
+
+	// clear framebuffer
 	Clear();
 
 	// set draw mode to wireframe
@@ -105,7 +121,11 @@ void Renderer::Tick(float deltaTime) {
 		}
 	}
 
+	// render ImGui frame
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+	// show final render
 	glfwSwapBuffers(window->GetRenderContext());
 }
 

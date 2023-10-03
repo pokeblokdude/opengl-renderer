@@ -1,11 +1,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <iostream>
-#include <vector>
-#include "Shader.h"
-#include "stb_image.h"
-#include "Window.h"
 #include "Renderer.h"
+#include <iostream>
+
+#pragma comment(linker, "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
 
 int main() {
 
@@ -17,9 +15,9 @@ int main() {
 		float t = glfwGetTime();
 
 		renderer.Tick(deltaTime);
-		
-		std::cout << 1/deltaTime << " fps / " << deltaTime * 1000 << " ms" << std::endl;
-		
+
+		//std::cout << 1 / deltaTime << " fps / " << deltaTime * 1000 << " ms" << std::endl;
+
 		deltaTime = glfwGetTime() - t;
 	}
 
