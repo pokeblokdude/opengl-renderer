@@ -155,6 +155,7 @@
     <None Include="src\shaders\vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\world\shapes\Quad.h" />
     <ClInclude Include="src\world\Camera.h" />
     <ClInclude Include="src\world\Scene.h" />
     <ClInclude Include="src\world\Mesh.h" />

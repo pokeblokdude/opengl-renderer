@@ -12,6 +12,8 @@ public:
 	void Tick(float deltaTime);
 	bool Quit();
 
+	float cameraSpeed = 10.f;
+
 private:
 	class Window* window;
 	std::unique_ptr<class Shader> shader;
@@ -22,4 +24,6 @@ private:
 
 	void Clear();
 	void Draw(class Mesh* mesh, class Transform transform);
+
+	void ProcessInput(class GLFWwindow* window, float deltaTime);
 };

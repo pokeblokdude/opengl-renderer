@@ -16,8 +16,6 @@ int main() {
 
 		renderer.Tick(deltaTime);
 
-		//std::cout << 1 / deltaTime << " fps / " << deltaTime * 1000 << " ms" << std::endl;
-
 		deltaTime = glfwGetTime() - t;
 	}
 

@@ -13,17 +13,17 @@ glm::mat4 Transform::Matrix() {
 }
 
 glm::vec3 Transform::Forward() {
-	glm::vec3 forward(
-		glm::cos(rotation.x) * glm::sin(rotation.y),
-		-glm::sin(rotation.x),
-		glm::cos(rotation.x) * glm::cos(rotation.y)
+	return glm::vec3(
+		glm::cos(glm::radians(rotation.x)) * glm::sin(glm::radians(rotation.y)),
+		-glm::sin(glm::radians(rotation.x)),
+		glm::cos(glm::radians(rotation.x)) * -glm::cos(glm::radians(rotation.y))
 	);
-	return forward;
 }
 
 glm::vec3 Transform::Right() {
-	return glm::vec3(
-		//glm::cos(rotation.y),
-		//0;
-	);
+	return glm::cross(Forward(), glm::vec3(0, 1, 0));
+}
+
+glm::vec3 Transform::Up() {
+	return glm::cross(Right(), Forward());
 }

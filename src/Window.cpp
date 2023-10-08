@@ -6,12 +6,6 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 
-void processInput(GLFWwindow* window) {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-		glfwSetWindowShouldClose(window, true);
-	}
-}
-
 Window::Window(int width, int height, const char* title) {
 	this->width = width;
 	this->height = height;
@@ -33,11 +27,33 @@ Window::Window(int width, int height, const char* title) {
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(0);
 	
+	// set window pointer (get with glfwGetWindowUserPointer())
+	glfwSetWindowUserPointer(window, this);
+
+	// set resize callback
+	auto resize = [](GLFWwindow* window, int width, int height) {
+		static_cast<Window*>(glfwGetWindowUserPointer(window))->Resize(width, height);
+		glViewport(0, 0, width, height);
+	};
+	glfwSetFramebufferSizeCallback(window, resize);
+
+	//set mouse move callback
+	auto mouseMove = [](GLFWwindow* window, double posx, double posy) {
+		static_cast<Window*>(glfwGetWindowUserPointer(window))->UpdateMousePos(posx, posy);
+	};
+	glfwSetCursorPosCallback(window, mouseMove);
+
+	if (glfwRawMouseMotionSupported()) {
+		glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+	}
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 	// load all OpenGL functions with GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		std::cout << "Failed to initialize GLAD" << std::endl;
 	}
 
+	// setup ImGui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
@@ -56,9 +72,13 @@ Window::~Window() {
 	glfwTerminate();
 }
 
-void Window::PollEvents() {
-	glfwPollEvents();
-	processInput(window);
+void Window::Tick(float deltaTime) {
+	if (mouseMoved) {
+		mouseMoved = false;
+	}
+	else {
+		mouseDelta = { 0, 0 };
+	}
 }
 
 bool Window::ShouldQuit() {
@@ -68,6 +88,21 @@ bool Window::ShouldQuit() {
 void Window::Resize(int width, int height) {
 	this->width = width;
 	this->height = height;
+}
+
+void Window::UpdateMousePos(float x, float y) {
+	mousePos = { x, y };
+	mouseDelta = mousePos - mouseLastPos;
+	mouseLastPos = mousePos;
+	mouseMoved = true;
+}
+
+glm::vec2 Window::GetMousePos() {
+	return mousePos;
+}
+
+glm::vec2 Window::GetMouseDelta() {
+	return mouseDelta;
 }
 
 GLFWwindow* Window::GetRenderContext() {

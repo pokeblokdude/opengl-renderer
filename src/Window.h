@@ -1,6 +1,9 @@
 #pragma once
-class Window
-{
+
+#include <glm/vec2.hpp>
+
+class Window {
+
 public:
 	int width, height;
 	const char* title;
@@ -8,15 +11,25 @@ public:
 	Window(int width, int height, const char* title);
 	~Window();
 
-	void PollEvents();
-	bool ShouldQuit();
+	void Tick(float deltaTime);
 
+	bool ShouldQuit();
 	void Resize(int width, int height);
+	void UpdateMousePos(float x, float y);
+
+	glm::vec2 GetMousePos();
+	glm::vec2 GetMouseDelta();
 
 	struct GLFWwindow* GetRenderContext();
 
 private:
+	glm::vec2 mouseLastPos;
+	glm::vec2 mousePos;
+	glm::vec2 mouseDelta;
+	bool mouseMoved = false;
+
 	bool quit;
 	struct GLFWwindow* window;
+
 };
 

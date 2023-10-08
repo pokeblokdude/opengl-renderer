@@ -9,11 +9,11 @@ Camera::Camera(float fov, float aspect, float near, float far) {
 }
 
 glm::mat4 Camera::ProjectionMatrix() {
-	return glm::perspective(fov, aspect, nearClip, farClip);
+	return glm::perspective(glm::radians(fov), aspect, nearClip, farClip);
 }
 
 glm::mat4 Camera::ViewMatrix() {
-	return glm::lookAt(transform.position, transform.Forward(), glm::vec3(0, 1, 0));
+	return glm::lookAt(transform.position, transform.position + transform.Forward(), glm::vec3(0, 1, 0));
 }
 
 void Camera::Resize(float aspect) {
