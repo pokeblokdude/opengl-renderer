@@ -25,25 +25,15 @@ Renderer::Renderer() {
 	camera = std::make_unique<Camera>(50, (window->width/(float)window->height), 0.001f, 1000);
 	camera->transform.position.z = 10;
 
-	//std::vector<float> vertices1 = {
-	//	// positions          // colors           // texture coords
-	//	 0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   2.0f, 2.0f,   // top right
-	//	 0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   2.0f, 0.0f,   // bottom right
-	//	-0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-	//	-0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 2.0f    // top left 
-	//};
-	//std::vector<uint32_t> indices1 = {
-	//	0, 1, 3,
-	//	1, 2, 3
-	//};
-
 	Object* cube = new Object();
+	cube->name = "Cube 0";
 	cube->mesh = new Cube();
 	//cube->transform.rotation.y = 45;
 
 	scene->objects.push_back(cube);
 
 	Object* cube1 = new Object();
+	cube1->name = "Cube 1";
 	cube1->mesh = new Cube();
 	cube1->transform.position.y = 1.5f;
 	cube1->transform.position.x = 1.5f;
@@ -53,6 +43,7 @@ Renderer::Renderer() {
 	scene->objects.push_back(cube1);
 
 	Object* quad = new Object();
+	quad->name = "Quad";
 	quad->mesh = new Quad();
 	quad->transform.position.x = -1.5f;
 	quad->transform.position.y = 2.0f;
@@ -115,15 +106,18 @@ void Renderer::Tick(float deltaTime) {
 	// actual rendering
 	camera->Resize(window->width / (float)window->height);
 	glm::vec2 look = window->GetMouseDelta();
-	camera->transform.rotation.y += look.x * 100 * deltaTime;
-	camera->transform.rotation.x += look.y * 100 * deltaTime;
-	camera->transform.rotation.x = glm::clamp(camera->transform.rotation.x, -90.f, 90.f);
+	if (doCameraMovement) {
+		camera->transform.rotation.y += look.x * 100 * deltaTime;
+		camera->transform.rotation.x += look.y * 100 * deltaTime;
+		camera->transform.rotation.x = glm::clamp(camera->transform.rotation.x, -90.f, 90.f);
+	}
 
 	// setup ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 	
+	// debug window
 	ImGui::Begin("Debug Window");
 	ImGui::Text("%.2f fps / %f ms", 1 / deltaTime, deltaTime);
 	ImGui::Text("Frame Size: %ix%i (%.3f:1)", window->width, window->height, camera->aspect);
@@ -134,10 +128,19 @@ void Renderer::Tick(float deltaTime) {
 	ImGui::Text("Delta: %.4f, %.4f", look.x, look.y);
 	ImGui::Separator();
 	ImGui::Text("Camera");
+	ImGui::InputFloat("Speed", &cameraSpeed, 0.1f, 1.0f);
+	ImGui::InputFloat("FOV", &camera->fov, 0.1f, 1.0f);
 	ImGui::Text("Position: %.4f, %.4f, %.4f", camera->transform.position.x, camera->transform.position.y, camera->transform.position.z);
 	ImGui::Text("Rotation: %.4f, %.4f, %.4f", camera->transform.rotation.x, camera->transform.rotation.y, camera->transform.rotation.z);
 	glm::vec3 f = camera->transform.Forward();
 	ImGui::Text("Looking toward: %.4f, %.4f, %.4f", f.x, f.y, f.z);
+	ImGui::End();
+
+	// objects list window
+	ImGui::Begin("Objects");
+	for (Object* obj : scene->objects) {
+		ImGui::Text(obj->name.c_str());
+	}
 	ImGui::End();
 
 	// clear framebuffer
@@ -145,6 +148,7 @@ void Renderer::Tick(float deltaTime) {
 
 	// set draw mode to wireframe
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 	for (Object* obj : scene->objects) {
 		if (obj->mesh != nullptr) {
 			Draw(obj->mesh, obj->transform);
@@ -191,22 +195,33 @@ void Renderer::ProcessInput(GLFWwindow* window, float deltaTime) {
 		glfwSetWindowShouldClose(window, true);
 	}
 
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		camera->transform.position += camera->transform.Forward() * cameraSpeed * deltaTime;
+	// enable camera movement when holding right click
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2) == GLFW_PRESS) {
+		doCameraMovement = true;
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+			camera->transform.position += camera->transform.Forward() * cameraSpeed * deltaTime;
+		}
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+			camera->transform.position -= camera->transform.Forward() * cameraSpeed * deltaTime;
+		}
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+			camera->transform.position -= camera->transform.Right() * cameraSpeed * deltaTime;
+		}
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+			camera->transform.position += camera->transform.Right() * cameraSpeed * deltaTime;
+		}
+		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+			camera->transform.position -= camera->transform.Up() * cameraSpeed * deltaTime;
+		}
+		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+			camera->transform.position += camera->transform.Up() * cameraSpeed * deltaTime;
+		}
 	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		camera->transform.position -= camera->transform.Forward() * cameraSpeed * deltaTime;
+	else {
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		doCameraMovement = false;
 	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-		camera->transform.position -= camera->transform.Right() * cameraSpeed * deltaTime;
-	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		camera->transform.position += camera->transform.Right() * cameraSpeed * deltaTime;
-	}
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-		camera->transform.position -= camera->transform.Up() * cameraSpeed * deltaTime;
-	}
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-		camera->transform.position += camera->transform.Up() * cameraSpeed * deltaTime;
-	}
+	
 }

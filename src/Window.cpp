@@ -25,6 +25,8 @@ Window::Window(int width, int height, const char* title) {
 		glfwTerminate();
 	}
 	glfwMakeContextCurrent(window);
+
+	// turn off vsync
 	glfwSwapInterval(0);
 	
 	// set window pointer (get with glfwGetWindowUserPointer())
@@ -46,7 +48,6 @@ Window::Window(int width, int height, const char* title) {
 	if (glfwRawMouseMotionSupported()) {
 		glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 	}
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// load all OpenGL functions with GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {

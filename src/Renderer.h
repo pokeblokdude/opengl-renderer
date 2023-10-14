@@ -26,4 +26,6 @@ private:
 	void Draw(class Mesh* mesh, class Transform transform);
 
 	void ProcessInput(class GLFWwindow* window, float deltaTime);
+
+	bool doCameraMovement = false;
 };

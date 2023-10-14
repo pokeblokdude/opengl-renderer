@@ -6,7 +6,9 @@ class Cube : public Mesh {
 
 public:
 	Cube() {
+		// TODO: fix broken uv coords on top & bottom faces (need split vertices)
 		verts = {
+		//  Position - - - - - | UV Coords - 
 			 0.5f,  0.5f, -0.5f, 0.0f, 1.0f,		// 0 - back top right
 			-0.5f,  0.5f, -0.5f, 1.0f, 1.0f,		// 1 - back top left
 			-0.5f, -0.5f, -0.5f, 1.0f, 0.0f,		// 2 - back bottom left
