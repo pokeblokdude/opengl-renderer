@@ -27,5 +27,8 @@ private:
 
 	void ProcessInput(class GLFWwindow* window, float deltaTime);
 
+	void DrawUI(float deltaTime);
+
 	bool doCameraMovement = false;
+	bool wireframe = false;
 };

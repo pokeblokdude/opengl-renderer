@@ -18,6 +18,6 @@ public:
 	glm::mat4 ViewMatrix();
 
 	void Resize(float aspect);
-
+	void ResetPosition();
 };
 

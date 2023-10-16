@@ -24,6 +24,7 @@
     <ProjectGuid>{99b57c02-73d4-4879-b65c-ff9f4281fbfa}</ProjectGuid>
     <RootNamespace>learnopengl</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>opengl-renderer</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -139,7 +140,7 @@
   <ItemGroup>
     <ClCompile Include="src\world\Camera.cpp" />
     <ClCompile Include="src\world\Scene.cpp" />
-    <ClCompile Include="src\world\Mesh.cpp" />
+    <ClCompile Include="src\world\model\Mesh.cpp" />
     <ClCompile Include="src\world\Object.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
@@ -159,11 +160,11 @@
     <None Include="src\shaders\vertex.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\world\shapes\Quad.h" />
+    <ClInclude Include="src\world\model\primitives\Quad.h" />
     <ClInclude Include="src\world\Camera.h" />
     <ClInclude Include="src\world\Scene.h" />
-    <ClInclude Include="src\world\Mesh.h" />
-    <ClInclude Include="src\world\shapes\Cube.h" />
+    <ClInclude Include="src\world\model\Mesh.h" />
+    <ClInclude Include="src\world\model\primitives\Cube.h" />
     <ClInclude Include="src\world\Object.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Shader.h" />

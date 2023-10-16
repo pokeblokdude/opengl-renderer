@@ -4,12 +4,12 @@
 #include <vector>
 #include "Shader.h"
 #include "stb_image.h"
-#include "world/shapes/Cube.h"
-#include "world/shapes/Quad.h"
+#include "world/model/primitives/Cube.h"
+#include "world/model/primitives/Quad.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "Window.h"
 #include "world/Scene.h"
-#include "world/Mesh.h"
+#include "world/model/Mesh.h"
 #include "world/Camera.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
@@ -117,37 +117,22 @@ void Renderer::Tick(float deltaTime) {
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 	
-	// debug window
-	ImGui::Begin("Debug Window");
-	ImGui::Text("%.2f fps / %f ms", 1 / deltaTime, deltaTime);
-	ImGui::Text("Frame Size: %ix%i (%.3f:1)", window->width, window->height, camera->aspect);
-	ImGui::Separator();
-	ImGui::Text("Mouse");
-	glm::vec2 mpos = window->GetMousePos();
-	ImGui::Text("Position: %.2f, %.2f", mpos.x, mpos.y);
-	ImGui::Text("Delta: %.4f, %.4f", look.x, look.y);
-	ImGui::Separator();
-	ImGui::Text("Camera");
-	ImGui::InputFloat("Speed", &cameraSpeed, 0.1f, 1.0f);
-	ImGui::InputFloat("FOV", &camera->fov, 0.1f, 1.0f);
-	ImGui::Text("Position: %.4f, %.4f, %.4f", camera->transform.position.x, camera->transform.position.y, camera->transform.position.z);
-	ImGui::Text("Rotation: %.4f, %.4f, %.4f", camera->transform.rotation.x, camera->transform.rotation.y, camera->transform.rotation.z);
-	glm::vec3 f = camera->transform.Forward();
-	ImGui::Text("Looking toward: %.4f, %.4f, %.4f", f.x, f.y, f.z);
-	ImGui::End();
-
-	// objects list window
-	ImGui::Begin("Objects");
-	for (Object* obj : scene->objects) {
-		ImGui::Text(obj->name.c_str());
-	}
-	ImGui::End();
+	DrawUI(deltaTime);
 
 	// clear framebuffer
 	Clear();
 
 	// set draw mode to wireframe
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	if (wireframe) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		//glDisable(GL_CULL_FACE);
+	}
+	else {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		//glEnable(GL_CULL_FACE);
+		//glCullFace(GL_BACK);
+	}
+
 
 	for (Object* obj : scene->objects) {
 		if (obj->mesh != nullptr) {
@@ -181,13 +166,75 @@ void Renderer::Draw(Mesh* mesh, Transform transform) {
 	//glActiveTexture(GL_TEXTURE1);
 	//glBindTexture(GL_TEXTURE_2D, texture2);
 
-	glm::mat4 MVP = camera->ProjectionMatrix() * camera->ViewMatrix() * transform.Matrix();
+	glm::mat4 M = transform.Matrix();
+	glm::mat4 V = camera->ViewMatrix();
+	glm::mat4 P = camera->ProjectionMatrix();
+
+	glm::mat4 MVP = P * V * M;
+	glm::mat4 MV = V * M;
 	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
+	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "MV"), 1, GL_FALSE, glm::value_ptr(MV));
+	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "view"), 1, GL_FALSE, glm::value_ptr(V));
+
+	glm::vec3 cam = camera->transform.Forward();
+	glUniform3fv(glGetUniformLocation(shader->ID, "camVector"), 1, (float*)&cam);
 
 	glBindVertexArray(mesh->VertexArrayObject());
 	glDrawElements(GL_TRIANGLES, mesh->faces.size(), GL_UNSIGNED_INT, 0);
 
 	glBindVertexArray(0);
+}
+
+void Renderer::DrawUI(float deltaTime) {
+	// menu bar
+	if (ImGui::BeginMainMenuBar()) {
+		if (ImGui::BeginMenu("File")) {
+			if (ImGui::MenuItem("New Scene", "Ctrl+N")) {
+
+			}
+			if (ImGui::MenuItem("Open", "Ctrl+O")) {
+
+			}
+			ImGui::Separator();
+			if (ImGui::MenuItem("Quit", "Alt+F4")) {
+				glfwSetWindowShouldClose(window->GetRenderContext(), true);
+			}
+			ImGui::EndMenu();
+		}
+		ImGui::EndMainMenuBar();
+	}
+
+	// debug window
+	ImGui::Begin("Debug Window");
+	ImGui::Text("%.2f fps / %f ms", 1 / deltaTime, deltaTime);
+	ImGui::Text("Frame Size: %ix%i (%.3f:1)", window->width, window->height, camera->aspect);
+	ImGui::SeparatorText("Mouse");
+	glm::vec2 mpos = window->GetMousePos();
+	ImGui::Text("Position: %.2f, %.2f", mpos.x, mpos.y);
+	glm::vec2 look = window->GetMouseDelta();
+	ImGui::Text("Delta: %.4f, %.4f", look.x, look.y);
+	ImGui::SeparatorText("Camera");
+	if (ImGui::Button("Reset Position")) {
+		camera->ResetPosition();
+	}
+	ImGui::DragFloat("Speed", &cameraSpeed, 0.5f);
+	ImGui::DragFloat("FOV", &camera->fov, 0.5f);
+	ImGui::DragFloat3("Position", (float*)&camera->transform.position, 0.5f);
+	ImGui::DragFloat3("Rotation", (float*)&camera->transform.rotation, 0.5f);
+	glm::vec3 f = camera->transform.Forward();
+	ImGui::Text("Looking toward: %.4f, %.4f, %.4f", f.x, f.y, f.z);
+	ImGui::SeparatorText("Options");
+	ImGui::Checkbox("Draw Wireframe", &wireframe);
+	ImGui::End();
+
+	//ImGui::ShowDemoWindow();
+
+	// objects list window
+	ImGui::Begin("Objects");
+	for (Object* obj : scene->objects) {
+		ImGui::Text(obj->name.c_str());
+	}
+	ImGui::End();
 }
 
 void Renderer::ProcessInput(GLFWwindow* window, float deltaTime) {

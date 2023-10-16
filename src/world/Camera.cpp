@@ -13,9 +13,14 @@ glm::mat4 Camera::ProjectionMatrix() {
 }
 
 glm::mat4 Camera::ViewMatrix() {
-	return glm::lookAt(transform.position, transform.position + transform.Forward(), glm::vec3(0, 1, 0));
+	return glm::lookAt(transform.position, transform.position + transform.Forward(), transform.Up());
 }
 
 void Camera::Resize(float aspect) {
 	this->aspect = aspect;
+}
+
+void Camera::ResetPosition() {
+	transform.position = glm::vec3{ 0, 0, 10 };
+	transform.rotation = glm::vec3{ 0, 0, 0 };
 }
