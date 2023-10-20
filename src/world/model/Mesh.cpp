@@ -1,13 +1,62 @@
 #include <glad/glad.h>
+#include "../../rendering/Shader.h"
+#include <string>
 #include "Mesh.h"
+
+Mesh::Mesh(PrimitiveShape& shape) {
+	this->verts = shape.verts;
+	this->indicies = shape.indicies;
+}
+Mesh::Mesh(std::vector<struct Vertex> verts, std::vector<uint32_t> indicies, std::vector<struct Texture> textures) {
+	this->verts = verts;
+	this->indicies = indicies;
+	this->textures = textures;
+
+	std::cout << "Creating new mesh:" << std::endl;
+	std::cout << "Verts: " << verts.size() << std::endl;
+	std::cout << "Faces: " << indicies.size()/3.0f << std::endl;
+	std::cout << "Textures: " << textures.size() << std::endl;
+
+	GenBuffers();
+}
 
 Mesh::~Mesh() {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 }
 
-uint32_t Mesh::VertexArrayObject() {
-	return VAO;
+void Mesh::Draw(Shader& shader) {
+	uint32_t diffuseN = 1, specularN = 1;
+	for (int i = 0; i < textures.size(); i++) {
+		glActiveTexture(GL_TEXTURE0 + i);
+
+		std::string number;
+		std::string name = textures[i].type;
+		if (name == "texture_diffuse") {
+			number = std::to_string(diffuseN);
+			diffuseN++;
+		}
+		else if(name == "texture_specular") {
+			number = std::to_string(specularN);
+			specularN++;
+		}
+
+		shader.SetInt(("material." + name + number).c_str(), i);
+		glBindTexture(GL_TEXTURE_2D, textures[i].id);
+	}
+	glActiveTexture(GL_TEXTURE0);
+
+	std::cout << "Drawing mesh " << this << std::endl;
+	std::cout << verts.size() << " verts" << std::endl;
+	std::cout << indicies.size() << " indicies" << std::endl;
+	std::cout << indicies.size()/3.0f << " faces" << std::endl;
+	std::cout << textures.size() << " textures" << std::endl;
+
+	// draw mesh
+	glBindVertexArray(VAO);
+	glDrawElements(GL_TRIANGLES, indicies.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(0);
 }
 
 void Mesh::GenBuffers() {
@@ -25,7 +74,7 @@ void Mesh::GenBuffers() {
 	glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(Vertex), verts.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, faces.size() * sizeof(uint32_t), faces.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicies.size() * sizeof(uint32_t), indicies.data(), GL_STATIC_DRAW);
 
 	// glVertexAttribPointer:
 	// - index (in order of attributes, vertex shader "layout"): int

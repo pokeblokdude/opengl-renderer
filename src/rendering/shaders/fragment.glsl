@@ -14,9 +14,10 @@ uniform sampler2D tex;
 void main()
 {
 	vec3 ambient = vec3(0.05f, 0.05f, 0.05f);
-	vec4 color = texture2D(tex, texCoord) * vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	vec4 color = /*texture2D(tex, texCoord) **/ vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	color = color * clamp(dot(cam, normal), 0, 1);
 	
 	FragColor = color + vec4(ambient, 0);
+	//FragColor = vec4(1, 1, 1, 1);
 }

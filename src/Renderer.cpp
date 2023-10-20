@@ -2,7 +2,8 @@
 #include <GLFW/glfw3.h>
 #include "Renderer.h"
 #include <vector>
-#include "Shader.h"
+#include <string>
+#include "rendering/Shader.h"
 #include "stb_image.h"
 #include "world/model/primitives/Cube.h"
 #include "world/model/primitives/Quad.h"
@@ -10,31 +11,36 @@
 #include "Window.h"
 #include "world/Scene.h"
 #include "world/model/Mesh.h"
+#include "world/model/Model.h"
 #include "world/Camera.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+#include <iostream>
 
 Renderer::Renderer() {
 
 	window = new Window(1920, 1080, "OpenGL Renderer");
 
-	shader = std::make_unique<Shader>("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
+	shader = new Shader("src/rendering/shaders/vertex.glsl", "src/rendering/shaders/fragment.glsl");
 
 	scene = std::make_unique<Scene>();
 	camera = std::make_unique<Camera>(50, (window->width/(float)window->height), 0.001f, 1000);
 	camera->transform.position.z = 10;
 
-	Object* cube = new Object();
-	cube->name = "Cube 0";
-	cube->mesh = new Cube();
+	Object* cube = new Object("cube");
+	cube->model = new Model("F:/Stuff/3D Models/All Pokemon/025 - Pikachu/P2_Pikachu.obj");
+	//Cube c;
+	//Mesh m(c);
+	//cube->model->AddMesh(m);
 	//cube->transform.rotation.y = 45;
 
 	scene->objects.push_back(cube);
 
-	Object* cube1 = new Object();
-	cube1->name = "Cube 1";
-	cube1->mesh = new Cube();
+	/*Object* cube1 = new Object("Cube 1");
+	cube1->model = new Model();
+	Mesh m1(c);
+	cube1->model->AddMesh(m1);
 	cube1->transform.position.y = 1.5f;
 	cube1->transform.position.x = 1.5f;
 	cube1->transform.rotation.y = -20;
@@ -42,17 +48,19 @@ Renderer::Renderer() {
 
 	scene->objects.push_back(cube1);
 
-	Object* quad = new Object();
-	quad->name = "Quad";
-	quad->mesh = new Quad();
+	Object* quad = new Object("Quad");
+	quad->model = new Model();
+	Quad q;
+	Mesh m2(q);
+	quad->model->AddMesh(m2);
 	quad->transform.position.x = -1.5f;
 	quad->transform.position.y = 2.0f;
 	quad->transform.rotation.z = 40.f;
 	quad->transform.rotation.x = 10.f;
 
-	scene->objects.push_back(quad);
+	scene->objects.push_back(quad);*/
 
-	glGenTextures(1, &texture);
+	/*glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
 	int width, height, nrChannels;
@@ -64,7 +72,7 @@ Renderer::Renderer() {
 	}
 	else {
 		std::cout << "Failed to load texture" << std::endl;
-	}
+	}*/
 
 	/*glGenTextures(1, &texture2);
 	glBindTexture(GL_TEXTURE_2D, texture2);
@@ -85,11 +93,12 @@ Renderer::Renderer() {
 	shader->SetActive();
 	glUniform1i(glGetUniformLocation(shader->ID, "tex"), 0);
 	shader->SetInt("tex2", 1);*/
-
+	
 	glEnable(GL_DEPTH_TEST);
 }
 
 Renderer::~Renderer() {
+	delete shader;
 	delete window;
 }
 
@@ -100,8 +109,8 @@ void Renderer::Tick(float deltaTime) {
 	window->Tick(deltaTime);
 
 	// update scene
-	scene->objects[0]->transform.rotation.y += 10 * deltaTime;
-	scene->objects[0]->transform.rotation.x += 10 * deltaTime;
+	//scene->objects[0]->transform.rotation.y += 10 * deltaTime;
+	//scene->objects[0]->transform.rotation.x += 10 * deltaTime;
 
 	// actual rendering
 	camera->Resize(window->width / (float)window->height);
@@ -133,10 +142,22 @@ void Renderer::Tick(float deltaTime) {
 		//glCullFace(GL_BACK);
 	}
 
-
 	for (Object* obj : scene->objects) {
-		if (obj->mesh != nullptr) {
-			Draw(obj->mesh, obj->transform);
+		if (obj->model != nullptr) {
+			glm::mat4 M = obj->transform.Matrix();
+			glm::mat4 V = camera->ViewMatrix();
+			glm::mat4 P = camera->ProjectionMatrix();
+
+			glm::mat4 MVP = P * V * M;
+			glm::mat4 MV = V * M;
+			glUniformMatrix4fv(glGetUniformLocation(shader->ID, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
+			glUniformMatrix4fv(glGetUniformLocation(shader->ID, "MV"), 1, GL_FALSE, glm::value_ptr(MV));
+			glUniformMatrix4fv(glGetUniformLocation(shader->ID, "view"), 1, GL_FALSE, glm::value_ptr(V));
+
+			glm::vec3 cam = camera->transform.Forward();
+			glUniform3fv(glGetUniformLocation(shader->ID, "camVector"), 1, (float*)&cam);
+
+			obj->model->Draw(*shader);
 		}
 	}
 
@@ -155,34 +176,6 @@ bool Renderer::Quit() {
 void Renderer::Clear() {
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-void Renderer::Draw(Mesh* mesh, Transform transform) {
-
-	shader->SetActive();
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_2D, texture2);
-
-	glm::mat4 M = transform.Matrix();
-	glm::mat4 V = camera->ViewMatrix();
-	glm::mat4 P = camera->ProjectionMatrix();
-
-	glm::mat4 MVP = P * V * M;
-	glm::mat4 MV = V * M;
-	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "MVP"), 1, GL_FALSE, glm::value_ptr(MVP));
-	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "MV"), 1, GL_FALSE, glm::value_ptr(MV));
-	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "view"), 1, GL_FALSE, glm::value_ptr(V));
-
-	glm::vec3 cam = camera->transform.Forward();
-	glUniform3fv(glGetUniformLocation(shader->ID, "camVector"), 1, (float*)&cam);
-
-	glBindVertexArray(mesh->VertexArrayObject());
-	glDrawElements(GL_TRIANGLES, mesh->faces.size(), GL_UNSIGNED_INT, 0);
-
-	glBindVertexArray(0);
 }
 
 void Renderer::DrawUI(float deltaTime) {

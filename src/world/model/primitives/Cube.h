@@ -1,12 +1,11 @@
 #pragma once
+#include <vector>
+#include "PrimitiveShape.h"
 
-#include "../Mesh.h"
-
-class Cube : public Mesh {
-
+class Cube : public PrimitiveShape {
 public:
+	
 	Cube() {
-		// TODO: fix broken uv coords on top & bottom faces (need split vertices)
 		verts = {
 		// VERTEX - Position - - - - - - - - - - - | Normal - - - - - - - - - - - | UV Coords - 
 			// BACK FACE
@@ -40,7 +39,7 @@ public:
 			Vertex{ glm::vec3{ 0.5f, -0.5f, -0.5f }, glm::vec3{ 0.0f, -1.0f, 0.0f }, glm::vec2{ 1.0f, 0.0f } },	// 22 - back bottom right
 			Vertex{ glm::vec3{-0.5f, -0.5f, -0.5f }, glm::vec3{ 0.0f, -1.0f, 0.0f }, glm::vec2{ 0.0f, 0.0f } },	// 23 - back bottom left
 		};
-		faces = {
+		indicies = {
 			 1,  0,  2, // back 1
 			 0,  3,  2, // back 2
 			 4,  6,  7, // front 1
@@ -54,8 +53,6 @@ public:
 			23, 22, 21, // bottom 1
 			21, 20, 23, // bottom 2
 		};
-
-		GenBuffers();
 	}
 
 };

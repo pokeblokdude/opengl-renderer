@@ -3,28 +3,23 @@
 #include <glm/vec3.hpp>
 #include <vector>
 #include <string>
+#include "primitives/PrimitiveShape.h"
 #include "../Object.h"
-
-struct Vertex {
-	glm::vec3 position;
-	glm::vec3 normal;
-	glm::vec2 texCoord;
-};
-
-struct Texture {
-	uint32_t id;
-	std::string type;
-};
+#include <iostream>
 
 class Mesh {
 
 public:
+	Mesh(PrimitiveShape& shape);
+	Mesh(std::vector<struct Vertex> verts, std::vector<uint32_t> indicies, std::vector<struct Texture> textures);
+
 	~Mesh();
 
 	std::vector<Vertex> verts;
-	std::vector<uint32_t> faces;
+	std::vector<uint32_t> indicies;
+	std::vector<Texture> textures;
 
-	uint32_t VertexArrayObject();
+	void Draw(class Shader& shader);
 
 protected:
 	void GenBuffers();

@@ -1,10 +1,11 @@
 #pragma once
 
-#include "../Mesh.h"
+#include "PrimitiveShape.h"
 
-class Quad : public Mesh {
+class Quad : public PrimitiveShape {
 
 public:
+	
 	Quad() {
 		verts = {
 		// VERTEX - Position - - - - - - - - - - | Normals - - - - - - - - - - - | UV Coords - - - - - - 
@@ -13,12 +14,10 @@ public:
 			Vertex{ glm::vec3{-0.5f,  0.5f, 0.0f }, glm::vec3{ 0.0f, 0.0f, 1.0f }, glm::vec2{ 0.0f, 1.0f } },	// top left
 			Vertex{ glm::vec3{ 0.5f,  0.5f, 0.0f }, glm::vec3{ 0.0f, 0.0f, 1.0f }, glm::vec2{ 1.0f, 1.0f } },	// top right
 		};
-		faces = {
+		indicies = {
 			0, 3, 2,
 			0, 1, 3,
 		};
-
-		GenBuffers();
 	}
 
 };
