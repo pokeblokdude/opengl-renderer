@@ -24,7 +24,6 @@ public:
 	std::vector<Object*> children;
 
 	class Model* model;
-	class Mesh* mesh;
 
 };
 

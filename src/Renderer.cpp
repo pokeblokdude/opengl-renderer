@@ -25,40 +25,17 @@ Renderer::Renderer() {
 	shader = new Shader("src/rendering/shaders/vertex.glsl", "src/rendering/shaders/fragment.glsl");
 
 	scene = std::make_unique<Scene>();
-	camera = std::make_unique<Camera>(50, (window->width/(float)window->height), 0.001f, 1000);
+	camera = std::make_unique<Camera>(50, (window->width/(float)window->height), 0.05f, 100);
 	camera->transform.position.z = 10;
 
 	Object* cube = new Object("cube");
-	cube->model = new Model("F:/Stuff/3D Models/All Pokemon/025 - Pikachu/P2_Pikachu.obj");
+	cube->model = new Model("C:/Users/Alex/Downloads/backpack/backpack.obj");
 	//Cube c;
 	//Mesh m(c);
 	//cube->model->AddMesh(m);
 	//cube->transform.rotation.y = 45;
 
 	scene->objects.push_back(cube);
-
-	/*Object* cube1 = new Object("Cube 1");
-	cube1->model = new Model();
-	Mesh m1(c);
-	cube1->model->AddMesh(m1);
-	cube1->transform.position.y = 1.5f;
-	cube1->transform.position.x = 1.5f;
-	cube1->transform.rotation.y = -20;
-	cube1->transform.rotation.x = 35;
-
-	scene->objects.push_back(cube1);
-
-	Object* quad = new Object("Quad");
-	quad->model = new Model();
-	Quad q;
-	Mesh m2(q);
-	quad->model->AddMesh(m2);
-	quad->transform.position.x = -1.5f;
-	quad->transform.position.y = 2.0f;
-	quad->transform.rotation.z = 40.f;
-	quad->transform.rotation.x = 10.f;
-
-	scene->objects.push_back(quad);*/
 
 	/*glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -73,26 +50,6 @@ Renderer::Renderer() {
 	else {
 		std::cout << "Failed to load texture" << std::endl;
 	}*/
-
-	/*glGenTextures(1, &texture2);
-	glBindTexture(GL_TEXTURE_2D, texture2);
-
-	data = stbi_load("res/texture2.png", &width, &height, &nrChannels, 0);
-	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else {
-		std::cout << "Failed to load texture" << std::endl;
-	}
-
-	stbi_image_free(data);
-
-	shader->SetActive();
-	glUniform1i(glGetUniformLocation(shader->ID, "tex"), 0);
-	shader->SetInt("tex2", 1);*/
 	
 	glEnable(GL_DEPTH_TEST);
 }
@@ -113,6 +70,8 @@ void Renderer::Tick(float deltaTime) {
 	//scene->objects[0]->transform.rotation.x += 10 * deltaTime;
 
 	// actual rendering
+	cameraSpeed += window->GetScrollDelta().y * 0.5f;
+	cameraSpeed = glm::clamp(cameraSpeed, 1.0f, 100.f);
 	camera->Resize(window->width / (float)window->height);
 	glm::vec2 look = window->GetMouseDelta();
 	if (doCameraMovement) {
@@ -205,7 +164,9 @@ void Renderer::DrawUI(float deltaTime) {
 	glm::vec2 mpos = window->GetMousePos();
 	ImGui::Text("Position: %.2f, %.2f", mpos.x, mpos.y);
 	glm::vec2 look = window->GetMouseDelta();
-	ImGui::Text("Delta: %.4f, %.4f", look.x, look.y);
+	ImGui::Text("Delta: %.1f, %.1f", look.x, look.y);
+	glm::vec2 scroll = window->GetScrollDelta();
+	ImGui::Text("Scroll: %.1f, %.1f", scroll.x, scroll.y);
 	ImGui::SeparatorText("Camera");
 	if (ImGui::Button("Reset Position")) {
 		camera->ResetPosition();

@@ -45,6 +45,11 @@ Window::Window(int width, int height, const char* title) {
 	};
 	glfwSetCursorPosCallback(window, mouseMove);
 
+	auto mouseScroll = [](GLFWwindow* window, double xoffset, double yoffset) {
+		static_cast<Window*>(glfwGetWindowUserPointer(window))->UpdateScroll(xoffset, yoffset);
+	};
+	glfwSetScrollCallback(window, mouseScroll);
+
 	if (glfwRawMouseMotionSupported()) {
 		glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 	}
@@ -74,11 +79,19 @@ Window::~Window() {
 }
 
 void Window::Tick(float deltaTime) {
+	
 	if (mouseMoved) {
 		mouseMoved = false;
 	}
 	else {
 		mouseDelta = { 0, 0 };
+	}
+
+	if (mouseScrolled) {
+		mouseScrolled = false;
+	}
+	else {
+		scrollDelta = { 0, 0 };
 	}
 }
 
@@ -98,12 +111,21 @@ void Window::UpdateMousePos(float x, float y) {
 	mouseMoved = true;
 }
 
+void Window::UpdateScroll(float x, float y) {
+	mouseScrolled = true;
+	scrollDelta = { x, y };
+}
+
 glm::vec2 Window::GetMousePos() {
 	return mousePos;
 }
 
 glm::vec2 Window::GetMouseDelta() {
 	return mouseDelta;
+}
+
+glm::vec2 Window::GetScrollDelta() {
+	return scrollDelta;
 }
 
 GLFWwindow* Window::GetRenderContext() {

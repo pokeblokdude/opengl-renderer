@@ -72,7 +72,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>F:\Alex\Documents\Visual Studio 2022\Projects\learn-opengl\vendor\stb_image;F:\Alex\Documents\Visual Studio 2022\Projects\learn-opengl\vendor\ImGui;$(IncludePath)</IncludePath>
+    <IncludePath>F:\Alex\Documents\Visual Studio 2022\Projects\learn-opengl\vendor\ImGui;F:\Alex\Documents\Visual Studio 2022\Projects\learn-opengl\vendor\stb_image;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>F:\Alex\Documents\Visual Studio 2022\Projects\learn-opengl\vendor\ImGui;F:\Alex\Documents\Visual Studio 2022\Projects\learn-opengl\vendor\stb_image;$(IncludePath)</IncludePath>

@@ -42,16 +42,16 @@ void Mesh::Draw(Shader& shader) {
 			specularN++;
 		}
 
-		shader.SetInt(("material." + name + number).c_str(), i);
+		shader.SetInt((name + number).c_str(), i);
 		glBindTexture(GL_TEXTURE_2D, textures[i].id);
 	}
 	glActiveTexture(GL_TEXTURE0);
 
-	std::cout << "Drawing mesh " << this << std::endl;
-	std::cout << verts.size() << " verts" << std::endl;
-	std::cout << indicies.size() << " indicies" << std::endl;
-	std::cout << indicies.size()/3.0f << " faces" << std::endl;
-	std::cout << textures.size() << " textures" << std::endl;
+	//std::cout << "Drawing mesh " << this << std::endl;
+	//std::cout << verts.size() << " verts" << std::endl;
+	//std::cout << indicies.size() << " indicies" << std::endl;
+	//std::cout << indicies.size()/3.0f << " faces" << std::endl;
+	//std::cout << textures.size() << " textures" << std::endl;
 
 	// draw mesh
 	glBindVertexArray(VAO);
