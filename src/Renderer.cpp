@@ -16,7 +16,7 @@
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
-#include <iostream>
+#include <nfd.h>
 
 Renderer::Renderer() {
 
@@ -25,17 +25,17 @@ Renderer::Renderer() {
 	shader = new Shader("src/rendering/shaders/vertex.glsl", "src/rendering/shaders/fragment.glsl");
 
 	scene = std::make_unique<Scene>();
-	camera = std::make_unique<Camera>(50, (window->width/(float)window->height), 0.05f, 100);
+	camera = std::make_unique<Camera>(50, (window->width/(float)window->height), 0.05f, 1000);
 	camera->transform.position.z = 10;
 
-	Object* cube = new Object("cube");
-	cube->model = new Model("C:/Users/Alex/Downloads/backpack/backpack.obj");
+	//Object* cube = new Object("cube");
+	//cube->model = new Model("C:/Users/Alex/Downloads/backpack/backpack.obj");
 	//Cube c;
 	//Mesh m(c);
 	//cube->model->AddMesh(m);
 	//cube->transform.rotation.y = 45;
 
-	scene->objects.push_back(cube);
+	//scene->objects.push_back(cube);
 
 	/*glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -137,15 +137,25 @@ void Renderer::Clear() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
+void Renderer::ImportObject() {
+	nfdchar_t* outPath;
+	nfdresult_t result = NFD_OpenDialog("obj", nullptr, &outPath);
+	if (result == NFD_OKAY) {
+		Object* o = new Object("Imported Object");
+		o->model = new Model(std::string(outPath));
+		scene->objects.push_back(o);
+	}
+}
+
 void Renderer::DrawUI(float deltaTime) {
 	// menu bar
 	if (ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("File")) {
 			if (ImGui::MenuItem("New Scene", "Ctrl+N")) {
-
+				scene.reset(new Scene());
 			}
 			if (ImGui::MenuItem("Open", "Ctrl+O")) {
-
+				ImportObject();
 			}
 			ImGui::Separator();
 			if (ImGui::MenuItem("Quit", "Alt+F4")) {

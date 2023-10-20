@@ -22,11 +22,11 @@ private:
 
 	uint32_t texture, texture2;
 
-	void Clear();
-
+	void ImportObject();
 	void ProcessInput(struct GLFWwindow* window, float deltaTime);
 
 	void DrawUI(float deltaTime);
+	void Clear();
 
 	bool doCameraMovement = false;
 	bool wireframe = false;
