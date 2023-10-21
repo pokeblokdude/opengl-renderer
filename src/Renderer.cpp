@@ -141,10 +141,15 @@ void Renderer::ImportObject() {
 	nfdchar_t* outPath;
 	nfdresult_t result = NFD_OpenDialog("obj", nullptr, &outPath);
 	if (result == NFD_OKAY) {
+		std::cout << "Loading object: " << outPath << std::endl;
 		Object* o = new Object("Imported Object");
 		o->model = new Model(std::string(outPath));
 		scene->objects.push_back(o);
 	}
+}
+
+void Renderer::NewScene() {
+	scene.reset(new Scene());
 }
 
 void Renderer::DrawUI(float deltaTime) {
@@ -233,6 +238,16 @@ void Renderer::ProcessInput(GLFWwindow* window, float deltaTime) {
 	else {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		doCameraMovement = false;
+	}
+
+	// hotkeys
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+		if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS) {
+			NewScene();
+		}
+		else if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+			ImportObject();
+		}
 	}
 	
 }

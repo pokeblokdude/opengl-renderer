@@ -20,9 +20,9 @@ private:
 	std::unique_ptr<class Scene> scene;
 	std::unique_ptr<class Camera> camera;
 
-	uint32_t texture, texture2;
-
 	void ImportObject();
+	void NewScene();
+
 	void ProcessInput(struct GLFWwindow* window, float deltaTime);
 
 	void DrawUI(float deltaTime);

@@ -12,10 +12,10 @@ Mesh::Mesh(std::vector<struct Vertex> verts, std::vector<uint32_t> indicies, std
 	this->indicies = indicies;
 	this->textures = textures;
 
-	std::cout << "Creating new mesh:" << std::endl;
-	std::cout << "Verts: " << verts.size() << std::endl;
-	std::cout << "Faces: " << indicies.size()/3.0f << std::endl;
-	std::cout << "Textures: " << textures.size() << std::endl;
+	//std::cout << "Creating new mesh:" << std::endl;
+	//std::cout << "Verts: " << verts.size() << std::endl;
+	//std::cout << "Faces: " << indicies.size()/3.0f << std::endl;
+	//std::cout << "Textures: " << textures.size() << std::endl;
 
 	GenBuffers();
 }
@@ -27,7 +27,7 @@ Mesh::~Mesh() {
 }
 
 void Mesh::Draw(Shader& shader) {
-	uint32_t diffuseN = 1, specularN = 1;
+	uint32_t diffuseN = 0, specularN = 0;
 	for (int i = 0; i < textures.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
 

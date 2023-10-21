@@ -9,7 +9,9 @@
 uint32_t TextureFromFile(const char* path, const std::string& directory)
 {
 	std::string filename = std::string(path);
-	filename = directory + '/' + filename;
+	filename = directory + '\\' + filename;
+
+	std::cout << "Loading texture: " << filename << std::endl;
 
 	uint32_t textureID;
 	glGenTextures(1, &textureID);
@@ -62,14 +64,14 @@ void Model::loadModel(const std::string& path) {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(
 		path,
-		aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices
+		aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices | aiProcess_GenSmoothNormals
 	);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
 		return;
 	}
-	directory = path.substr(0, path.find_last_of('/'));
+	directory = path.substr(0, path.find_last_of('\\'));
 
 	processNode(scene->mRootNode, scene);
 }

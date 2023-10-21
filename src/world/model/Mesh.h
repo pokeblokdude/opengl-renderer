@@ -25,7 +25,7 @@ protected:
 	void GenBuffers();
 
 private:
-	uint32_t VAO, VBO, EBO;	
+	uint32_t VAO, VBO, EBO;
 
 };
 
